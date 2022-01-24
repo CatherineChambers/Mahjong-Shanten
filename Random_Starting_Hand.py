@@ -1,8 +1,7 @@
 import numpy as np
 
 
-def random_starting_hand():
-    input_number = input("Please input the number of random hands to be generated: ")
+def random_starting_hand(input_number):
     k = 0
     while True:
         if k == int(input_number):
@@ -22,8 +21,4 @@ def random_starting_hand():
         hand_as_list = manzu + list("m") + pinzu + list("p") + souzu + list("s") + jihai + list("z")
         hand_output = "".join(str(i) for i in hand_as_list)
         print("Starting hand {}: {}".format(k, hand_output))
-
-
-if __name__ == "__main__":
-    random_starting_hand()
-
+        return hand_output
