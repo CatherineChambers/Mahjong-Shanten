@@ -36,7 +36,7 @@ class MahjongEfficiency(object):
         if len(stripped_hand) != 14:
             raise Exception("Please input a valid starting hand of 14 tiles.")
 
-        unwanted_char = [char for char in self.hand if not char.isdigit() if char not in "0mpsz"]
+        unwanted_char = [char for char in self.hand if char not in "123456789mpsz"]
         if len(unwanted_char) > 0:
             raise Exception("Please input a valid hand. This cannot contain: {}.".format(unwanted_char))
 
