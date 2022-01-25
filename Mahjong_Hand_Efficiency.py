@@ -1,5 +1,3 @@
-import numpy as np
-
 import Random_Starting_Hand
 
 
@@ -23,8 +21,9 @@ class MahjongEfficiency(object):
         self.hand_array = []
 
         # ----------------------------
-        self.error_handling()
+        self.error_handling()  # This call checks that the number of tiles is 14.
         self.map_input_hand()
+        self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         self.check_tile_combinations()
         self.count_tile_amount()
 
@@ -33,12 +32,18 @@ class MahjongEfficiency(object):
         if len(stripped_hand) != 14:
             raise Exception("Please input a valid starting hand of 14 tiles.")
 
+        tiles = [i for sublist in self.hand_array for i in sublist]
+        count = [tiles.count(i) for i in tiles]
+        more_than_four = [i for i in count if i > 4]
+        if len(more_than_four) > 0:
+            raise Exception("Please input a valid hand. You can not have more than 4 of any tile")
+
     def map_input_hand(self):
         """
         Take the input hand and maps it to: 1-9 manzu, 10-18 pinzu, 19-27 souzu, 28-34 jihai.
-        Duplicates, red fives, and flowers tiles excluded.
+        Red fives and flowers tiles are excluded.
         """
-        index = []
+        index = 0
         mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
         mutable_hand = self.hand
         stripped_hand_suits = [char for char in self.hand if not char.isdigit()]
@@ -46,20 +51,17 @@ class MahjongEfficiency(object):
         for suit in stripped_hand_suits:
             for suit_list in mapping_array:
                 if suit in suit_list:
-                    i = mapping_array.index(suit_list)
-                    if i == 0:
-                        last_index = 0
-                    else:
-                        last_index = index
+                    ma_index = mapping_array.index(suit_list)
+                    last_index = index
                     # Finds the position of each of "mpsz" in the input hand.
-                    index = mutable_hand.index(mapping_array[i][0])
+                    index = mutable_hand.index(mapping_array[ma_index][0])
                     # Removes the suit character from the hand so that subsequent indexing gives the correct index.
                     # e.g. 123m2p vs 1232p: the index of p should be 4.
                     mutable_hand = mutable_hand.replace(suit, "", 1)
                     #  Gets the tiles of each suit, maps them to the new numbers, then appends them to the hand_array.
                     tiles = mutable_hand[last_index:index]
                     tiles = [int(k) for k in tiles]
-                    self.hand_array.append([k + mapping_array[i][1] for k in tiles])
+                    self.hand_array.append([k + mapping_array[ma_index][1] for k in tiles])
 
     def check_tile_combinations(self):
         pass
