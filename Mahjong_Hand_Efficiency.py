@@ -3,7 +3,7 @@ import Random_Starting_Hand
 
 class MahjongEfficiency(object):
     """
-    Class to generate the shanten of a given Japanese mahjong hand.
+    Class to generate the shanten of a given Japanese Mahjong hand.
 
     Attributes:
         hand : str
@@ -15,8 +15,10 @@ class MahjongEfficiency(object):
         map_input_hand():
             Returns the hand in the mapped format ready for further computation.
     """
+
     def __init__(self, hand):
-        self.hand = hand
+        # hand = input("Please input a hand: ")
+        self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
         self.shanten_count = 0
         self.hand_array = []
 
@@ -24,6 +26,8 @@ class MahjongEfficiency(object):
         self.error_handling()  # This call checks that the number of tiles is 14.
         self.map_input_hand()
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
+        print("Hand: {}".format(self.hand))
+        print("Hand array: {}".format(self.hand_array))  # For testing only.
         self.check_tile_combinations()
         self.count_tile_amount()
 
@@ -32,6 +36,11 @@ class MahjongEfficiency(object):
         if len(stripped_hand) != 14:
             raise Exception("Please input a valid starting hand of 14 tiles.")
 
+        unwanted_char = [char for char in self.hand if not char.isdigit() if char not in "0mpsz"]
+        if len(unwanted_char) > 0:
+            raise Exception("Please input a valid hand. This cannot contain: {}.".format(unwanted_char))
+
+        # ----------------------------
         tiles = [i for sublist in self.hand_array for i in sublist]
         count = [tiles.count(i) for i in tiles]
         more_than_four = [i for i in count if i > 4]
@@ -40,7 +49,7 @@ class MahjongEfficiency(object):
 
     def map_input_hand(self):
         """
-        Take the input hand and maps it to: 1-9 manzu, 10-18 pinzu, 19-27 souzu, 28-34 jihai.
+        Takes the input hand and maps it to: 1-9 manzu, 10-18 pinzu, 19-27 souzu, 28-34 jihai.
         Red fives and flowers tiles are excluded.
         """
         index = 0

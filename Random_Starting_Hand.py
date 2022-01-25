@@ -1,7 +1,8 @@
 import numpy as np
 
 
-def random_starting_hand(input_number):
+def random_starting_hand(input_number: int) -> str:
+    """ Generates a number of random Mahjong hands specified by the input integer. """
     k = 0
     while True:
         if k == int(input_number):
@@ -20,5 +21,4 @@ def random_starting_hand(input_number):
         jihai = sorted([tiles_by_code[i - 1] for i in chosen_tiles if 27 < i < 35])
         hand_as_list = manzu + list("m") + pinzu + list("p") + souzu + list("s") + jihai + list("z")
         hand_output = "".join(str(i) for i in hand_as_list)
-        print("Starting hand {}: {}".format(k, hand_output))
         return hand_output
