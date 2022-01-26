@@ -1,3 +1,5 @@
+import itertools
+
 import Random_Starting_Hand
 
 
@@ -73,7 +75,24 @@ class MahjongEfficiency(object):
                     self.hand_array.append([k + mapping_array[ma_index][1] for k in tiles])
 
     def check_tile_combinations(self):
-        pass
+        melds = []
+        pairs = []
+        eyes = []
+        for suit in self.hand_array:
+            melds.append(list(set([i for i in itertools.combinations(suit, 3)])))
+            pairs.append(list(set([i for i in itertools.combinations(suit, 2)])))
+            eyes.append(list(set([i for i in itertools.combinations(suit, 1)])))
+        for j in range(0, len(melds)):
+            for combination in melds[j]:
+                for tile in combination:
+                    if tile < 10:
+                        pass
+                    elif tile < 19:
+                        pass
+                    elif tile < 28:
+                        pass
+                    else:
+                        pass
 
     def count_tile_amount(self):
         pass
@@ -86,5 +105,6 @@ class MahjongEfficiency(object):
 
 
 if __name__ == "__main__":
-    random_hand = Random_Starting_Hand.random_starting_hand(1)
+    random_hand = "57899p 4468s 34567z"
+    # random_hand = Random_Starting_Hand.random_starting_hand(1)
     MahjongEfficiency(random_hand)
