@@ -1,4 +1,5 @@
 import itertools
+from typing import List, Any
 
 import Random_Starting_Hand
 
@@ -7,18 +8,20 @@ class MahjongEfficiency(object):
     """
     Class to generate the shanten of a given Japanese Mahjong hand.
 
-    Attributes:
-        hand : str
-            The 14 tile input hand.
-
     Methods:
         error_handling():
             Checks that the input contains 14 tiles and a maximum of 4 of each tile.
         map_input_hand():
             Returns the hand in the mapped format ready for further computation.
+        create_tile_combinations():
+            Returns lists containing all the melds, couples and eyes that can be formed from each suit.
     """
 
     def __init__(self, hand):
+        """
+
+        :param hand:
+        """
         # hand = input("Please input a hand: ")
         self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
         self.shanten_count = 0
@@ -31,12 +34,13 @@ class MahjongEfficiency(object):
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
         print("Hand array: {}".format(self.hand_array))  # For testing only.
-        melds, pairs, eyes = self.create_tile_combinations()
-        self.choose_melds(melds)
-        self.choose_melds(pairs)
-        self.choose_melds(eyes)
+        melds, couples, eyes = self.create_tile_combinations()
+        self.get_tile_combinations(melds)
+        self.get_tile_combinations(couples)
+        self.get_tile_combinations(eyes)
 
     def error_handling(self):
+        """Checks whether the input has 14 tiles, no more than 4 of any tile, and the correct characters."""
         stripped_hand = "".join([char for char in self.hand if char.isdigit()])
         if len(stripped_hand) != 14:
             raise Exception("Please input a valid starting hand of 14 tiles.")
@@ -77,26 +81,42 @@ class MahjongEfficiency(object):
                     self.hand_array.append([k + self.mapping_array[ma_index][1] for k in tiles])
 
     def create_tile_combinations(self):
+        """
+        Takes the input hand and creates three lists of tile combinations for each suit.
+        These are melds, couples and eyes, where melds are groups of three, couples are groups of two, and eyes are single
+        tiles.
+        """
         melds = []
-        pairs = []
+        couples = []
         eyes = []
         for suit in self.hand_array:
             melds.append(list(set([i for i in itertools.combinations(suit, 3)])))
-            pairs.append(list(set([i for i in itertools.combinations(suit, 2)])))
+            couples.append(list(set([i for i in itertools.combinations(suit, 2)])))
             eyes.append(list(set([i for i in itertools.combinations(suit, 1)])))
-        return melds, pairs, eyes
+        return melds, couples, eyes
 
-    def choose_melds(self, tile_combinations):
-        for j in range(0, len(tile_combinations)):
-            for combination in tile_combinations[j]:
-                if combination[0] > self.mapping_array[3][1]:
-                    pass
-                elif self.mapping_array[3][1] >= combination[0] > self.mapping_array[2][1]:
-                    pass
-                elif self.mapping_array[2][1] >= combination[0] > self.mapping_array[1][1]:
+    def get_tile_combinations(self, input_combinations):
+        suit_ceiling = [self.mapping_array[k][1] for k in range(0, len(self.mapping_array))]
+        tile_combinations = [i for j in range(0, len(input_combinations)) for i in input_combinations[j]]
+        for combination in tile_combinations:
+            if len(combination) == 3:
+                if combination[0] > suit_ceiling[3]:
                     pass
                 else:
                     pass
+            elif len(combination) == 2:
+                if combination[0] > suit_ceiling[3]:
+                    pass
+                else:
+                    pass
+            elif len(combination) == 1:
+                if combination[0] > suit_ceiling[3]:
+                    pass
+                else:
+                    pass
+
+    def get_shanten(self):
+        pass
 
     def count_fu(self):
         pass
@@ -106,6 +126,6 @@ class MahjongEfficiency(object):
 
 
 if __name__ == "__main__":
-    random_hand = "57899p 4468s 34567z"
+    random_hand = "57899m4468s 34567z"
     # random_hand = Random_Starting_Hand.random_starting_hand(1)
     MahjongEfficiency(random_hand)
