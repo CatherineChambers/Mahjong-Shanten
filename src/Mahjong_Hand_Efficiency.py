@@ -1,7 +1,5 @@
 import itertools
 
-import Random_Starting_Hand
-
 
 class MahjongEfficiency(object):
     """
@@ -126,9 +124,3 @@ class MahjongEfficiency(object):
 
     def count_han(self):
         pass
-
-
-if __name__ == "__main__":
-    random_hand = "123778m138p11s777z"
-    # random_hand = Random_Starting_Hand.random_starting_hand(1)
-    MahjongEfficiency(random_hand)
