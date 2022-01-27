@@ -23,6 +23,7 @@ class MahjongEfficiency(object):
         self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
         self.shanten_count = 0
         self.hand_array = []
+        self.mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
 
         # ----------------------------
         self.error_handling()  # This call checks that the number of tiles is 14.
@@ -30,8 +31,10 @@ class MahjongEfficiency(object):
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
         print("Hand array: {}".format(self.hand_array))  # For testing only.
-        self.check_tile_combinations()
-        self.count_tile_amount()
+        melds, pairs, eyes = self.create_tile_combinations()
+        self.choose_melds(melds)
+        self.choose_melds(pairs)
+        self.choose_melds(eyes)
 
     def error_handling(self):
         stripped_hand = "".join([char for char in self.hand if char.isdigit()])
@@ -55,26 +58,25 @@ class MahjongEfficiency(object):
         Red fives and flowers tiles are excluded.
         """
         index = 0
-        mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
         mutable_hand = self.hand
         stripped_hand_suits = [char for char in self.hand if not char.isdigit()]
 
         for suit in stripped_hand_suits:
-            for suit_list in mapping_array:
+            for suit_list in self.mapping_array:
                 if suit in suit_list:
-                    ma_index = mapping_array.index(suit_list)
+                    ma_index = self.mapping_array.index(suit_list)
                     last_index = index
                     # Finds the position of each of "mpsz" in the input hand.
-                    index = mutable_hand.index(mapping_array[ma_index][0])
+                    index = mutable_hand.index(self.mapping_array[ma_index][0])
                     # Removes the suit character from the hand so that subsequent indexing gives the correct index.
                     # e.g. 123m2p vs 1232p: the index of p should be 4.
                     mutable_hand = mutable_hand.replace(suit, "", 1)
                     #  Gets the tiles of each suit, maps them to the new numbers, then appends them to the hand_array.
                     tiles = mutable_hand[last_index:index]
                     tiles = [int(k) for k in tiles]
-                    self.hand_array.append([k + mapping_array[ma_index][1] for k in tiles])
+                    self.hand_array.append([k + self.mapping_array[ma_index][1] for k in tiles])
 
-    def check_tile_combinations(self):
+    def create_tile_combinations(self):
         melds = []
         pairs = []
         eyes = []
@@ -82,20 +84,19 @@ class MahjongEfficiency(object):
             melds.append(list(set([i for i in itertools.combinations(suit, 3)])))
             pairs.append(list(set([i for i in itertools.combinations(suit, 2)])))
             eyes.append(list(set([i for i in itertools.combinations(suit, 1)])))
-        for j in range(0, len(melds)):
-            for combination in melds[j]:
-                for tile in combination:
-                    if tile < 10:
-                        pass
-                    elif tile < 19:
-                        pass
-                    elif tile < 28:
-                        pass
-                    else:
-                        pass
+        return melds, pairs, eyes
 
-    def count_tile_amount(self):
-        pass
+    def choose_melds(self, tile_combinations):
+        for j in range(0, len(tile_combinations)):
+            for combination in tile_combinations[j]:
+                if combination[0] > self.mapping_array[3][1]:
+                    pass
+                elif self.mapping_array[3][1] >= combination[0] > self.mapping_array[2][1]:
+                    pass
+                elif self.mapping_array[2][1] >= combination[0] > self.mapping_array[1][1]:
+                    pass
+                else:
+                    pass
 
     def count_fu(self):
         pass
