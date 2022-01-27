@@ -1,5 +1,4 @@
 import itertools
-from typing import List, Any
 
 import Random_Starting_Hand
 
@@ -101,19 +100,23 @@ class MahjongEfficiency(object):
         for combination in tile_combinations:
             if len(combination) == 3:
                 if combination[0] > suit_ceiling[3]:
-                    pass
-                else:
-                    pass
-            elif len(combination) == 2:
-                if combination[0] > suit_ceiling[3]:
-                    pass
-                else:
-                    pass
-            elif len(combination) == 1:
-                if combination[0] > suit_ceiling[3]:
-                    pass
-                else:
-                    pass
+                    self.combination_type(combination)
+                elif suit_ceiling[3] >= combination[0] > suit_ceiling[2]:
+                    self.combination_type(combination)
+                elif suit_ceiling[2] >= combination[0] > suit_ceiling[1]:
+                    self.combination_type(combination)
+                elif suit_ceiling[1] >= combination[0] > suit_ceiling[0]:
+                    self.combination_type(combination)
+
+    def combination_type(self, combination):
+        if combination[1] == sum(combination) / len(combination) and combination[1] == combination[0] + 1:
+            print("shuntsu", combination)
+        elif combination[0] == sum(combination) / len(combination):
+            print("ankou", combination)
+        elif (combination[2] == combination[0] + 1) \
+                and ((combination[1] == combination[0]) or (combination[1] == combination[0] + 1)):
+            # (n, n, n+1) or (n, n+1, n+1)
+            pass
 
     def get_shanten(self):
         pass
@@ -126,6 +129,6 @@ class MahjongEfficiency(object):
 
 
 if __name__ == "__main__":
-    random_hand = "57899m4468s 34567z"
+    random_hand = "123778m138p11s777z"
     # random_hand = Random_Starting_Hand.random_starting_hand(1)
     MahjongEfficiency(random_hand)
