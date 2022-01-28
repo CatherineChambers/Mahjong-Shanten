@@ -21,7 +21,7 @@ class MahjongEfficiency(object):
         """
         # hand = input("Please input a hand: ")
         self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
-        self.shanten_count = 0
+        self.shanten = 6
         self.hand_array = []
         self.mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
 
@@ -31,10 +31,7 @@ class MahjongEfficiency(object):
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
         print("Hand array: {}".format(self.hand_array))  # For testing only.
-        melds, couples, eyes = self.create_tile_combinations()
-        self.get_tile_combinations(melds)
-        self.get_tile_combinations(couples)
-        self.get_tile_combinations(eyes)
+        self.run_tile_selection()
 
     def error_handling(self):
         """Checks whether the input has 14 tiles, no more than 4 of any tile, and the correct characters."""
@@ -56,7 +53,7 @@ class MahjongEfficiency(object):
     def map_input_hand(self):
         """
         Takes the input hand and maps it to: 1-9 manzu, 10-18 pinzu, 19-27 souzu, 28-34 jihai.
-        Red fives and flowers tiles are excluded.
+        Red fives and flower tiles are excluded.
         """
         index = 0
         mutable_hand = self.hand
@@ -93,28 +90,55 @@ class MahjongEfficiency(object):
         return melds, couples, eyes
 
     def get_tile_combinations(self, input_combinations):
-        suit_ceiling = [self.mapping_array[k][1] for k in range(0, len(self.mapping_array))]
+        suit_floor = [self.mapping_array[k][1] for k in range(0, len(self.mapping_array))]
         tile_combinations = [i for j in range(0, len(input_combinations)) for i in input_combinations[j]]
         for combination in tile_combinations:
             if len(combination) == 3:
-                if combination[0] > suit_ceiling[3]:
-                    self.combination_type(combination)
-                elif suit_ceiling[3] >= combination[0] > suit_ceiling[2]:
-                    self.combination_type(combination)
-                elif suit_ceiling[2] >= combination[0] > suit_ceiling[1]:
-                    self.combination_type(combination)
-                elif suit_ceiling[1] >= combination[0] > suit_ceiling[0]:
-                    self.combination_type(combination)
+                if combination[0] > suit_floor[3]:
+                    self.meld_type(combination)
+                elif suit_floor[3] >= combination[0] > suit_floor[2]:
+                    self.meld_type(combination)
+                elif suit_floor[2] >= combination[0] > suit_floor[1]:
+                    self.meld_type(combination)
+                elif suit_floor[1] >= combination[0] > suit_floor[0]:
+                    self.meld_type(combination)
+            if len(combination) == 2:
+                if combination[0] > suit_floor[3]:
+                    self.couple_type(combination, suit_floor[3], 34)
+                elif suit_floor[3] >= combination[0] > suit_floor[2]:
+                    self.couple_type(combination, suit_floor[2], suit_floor[3])
+                elif suit_floor[2] >= combination[0] > suit_floor[1]:
+                    self.couple_type(combination, suit_floor[1], suit_floor[2])
+                elif suit_floor[1] >= combination[0] > suit_floor[0]:
+                    self.couple_type(combination, suit_floor[0], suit_floor[1])
 
-    def combination_type(self, combination):
+    def meld_type(self, combination):
         if combination[1] == sum(combination) / len(combination) and combination[1] == combination[0] + 1:
-            print("shuntsu", combination)
+            if combination[0] <= 27:  # Jihai can only be ankou or pairs
+                print("shuntsu", combination)
         elif combination[0] == sum(combination) / len(combination):
             print("ankou", combination)
-        elif (combination[2] == combination[0] + 1) \
-                and ((combination[1] == combination[0]) or (combination[1] == combination[0] + 1)):
-            # (n, n, n+1) or (n, n+1, n+1)
-            pass
+
+    def couple_type(self, combination, floor, ceiling):
+        if combination[0] <= 27:
+            if combination[0] == combination[1]+1:
+                if combination[0] >= floor or combination[1] > ceiling:
+                    print("ryanmen", combination)  # ryanmen (n, n+1) 2-sided wait
+                else:
+                    print("penchan", combination)  # penchan (n, n+1) 1-sided wait (edge-wait)
+            elif combination[0] == combination[1]+2:
+                print("kanchan", combination)  # kanchan (n, n+2) 1-sided wait
+            elif combination[0] == combination[1]:
+                print("pair", combination)  # toitsu, shanpon, or jantou (this depends on the amount of this type present).
+        else:  # Jihai can only have pairs, no other couple wait type
+            if combination[0] == combination[1]:
+                print("pair", combination)
+
+    def run_tile_selection(self):
+        melds, couples, eyes = self.create_tile_combinations()
+        self.get_tile_combinations(melds)
+        self.get_tile_combinations(couples)
+        self.get_tile_combinations(eyes)
 
     def get_shanten(self):
         pass
