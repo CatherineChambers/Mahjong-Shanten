@@ -71,8 +71,9 @@ class MahjongEfficiency(object):
                     mutable_hand = mutable_hand.replace(suit, "", 1)
                     #  Gets the tiles of each suit, maps them to the new numbers, then appends them to the hand_array.
                     tiles = mutable_hand[last_index:index]
-                    tiles = [int(k) for k in tiles]
-                    self.hand_array.append([k + self.mapping_array[ma_index][1] for k in tiles])
+                    tiles = [int(k) + self.mapping_array[ma_index][1] for k in tiles]
+                    self.hand_array.append(tiles)
+        self.hand_array.sort()
 
     def create_tile_combinations(self):
         """
@@ -136,15 +137,18 @@ class MahjongEfficiency(object):
 
     def run_tile_selection(self):
         melds, couples, eyes = self.create_tile_combinations()
+        self.kokushi_musou(eyes)
         self.get_tile_combinations(melds)
         self.get_tile_combinations(couples)
         self.get_tile_combinations(eyes)
 
+    def chiitoitsu(self, couples):
+        pairs = [couple for suit in range(0, len(couples)) for couple in couples[suit] if couple[0] == couple[1]]
+        chiitoitsu_shanten = 6 - len(pairs)  # -1 is a winning hand, 0 is a ready hand
+        return chiitoitsu_shanten
+
+    def kokushi_musou(self, eyes):  # Need 9 different terminals and honours 4-shanten
+        pass
+
     def get_shanten(self):
-        pass
-
-    def count_fu(self):
-        pass
-
-    def count_han(self):
         pass
