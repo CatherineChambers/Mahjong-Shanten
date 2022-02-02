@@ -31,7 +31,11 @@ class MahjongEfficiency(object):
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
         print("Hand array: {}".format(self.hand_array))  # For testing only.
-        self.run_tile_selection()
+        melds, couples, eyes = self.create_tile_combinations()
+        self.kokushi_musou(eyes)
+        self.get_tile_combinations(melds)
+        self.get_tile_combinations(couples)
+        self.get_tile_combinations(eyes)
 
     def error_handling(self):
         """Checks whether the input has 14 tiles, no more than 4 of any tile, and the correct characters."""
@@ -135,19 +139,12 @@ class MahjongEfficiency(object):
             if combination[0] == combination[1]:
                 print("pair", combination)
 
-    def run_tile_selection(self):
-        melds, couples, eyes = self.create_tile_combinations()
-        self.kokushi_musou(eyes)
-        self.get_tile_combinations(melds)
-        self.get_tile_combinations(couples)
-        self.get_tile_combinations(eyes)
-
     def chiitoitsu(self, couples):
         pairs = [couple for suit in range(0, len(couples)) for couple in couples[suit] if couple[0] == couple[1]]
         chiitoitsu_shanten = 6 - len(pairs)  # -1 is a winning hand, 0 is a ready hand
         return chiitoitsu_shanten
 
-    def kokushi_musou(self, eyes):  # Need 9 different terminals and honours 4-shanten
+    def kokushi_musou(self, eyes):  # Need 9 different terminals and honours for 4-shanten
         pass
 
     def get_shanten(self):
