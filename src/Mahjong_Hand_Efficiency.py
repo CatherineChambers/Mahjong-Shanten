@@ -31,11 +31,10 @@ class MahjongEfficiency(object):
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
         print("Hand array: {}".format(self.hand_array))  # For testing only.
-        melds, couples, eyes = self.create_tile_combinations()
-        self.kokushi_musou(eyes)
-        self.get_tile_combinations(melds)
-        self.get_tile_combinations(couples)
-        self.get_tile_combinations(eyes)
+        melds_manzu, couples_manzu, eyes_manzu = self.create_tile_combinations(1, 9)
+        melds_pinzu, couples_pinzu, eyes_pinzu = self.create_tile_combinations(10, 18)
+        melds_souzu, couples_souzu, eyes_souzu = self.create_tile_combinations(19, 27)
+        melds_jihai, couples_jihai, eyes_jihai = self.create_tile_combinations(28, 34)
 
     def error_handling(self):
         """Checks whether the input has 14 tiles, no more than 4 of any tile, and the correct characters."""
@@ -48,8 +47,7 @@ class MahjongEfficiency(object):
             raise Exception("Please input a valid hand. This cannot contain: {}.".format(unwanted_char))
 
         # ----------------------------
-        tiles = [i for sublist in self.hand_array for i in sublist]
-        count = [tiles.count(i) for i in tiles]
+        count = [self.hand_array.count(i) for i in self.hand_array]
         more_than_four = [i for i in count if i > 4]
         if len(more_than_four) > 0:
             raise Exception("Please input a valid hand. You can not have more than 4 of any tile")
@@ -76,25 +74,22 @@ class MahjongEfficiency(object):
                     #  Gets the tiles of each suit, maps them to the new numbers, then appends them to the hand_array.
                     tiles = mutable_hand[last_index:index]
                     tiles = [int(k) + self.mapping_array[ma_index][1] for k in tiles]
-                    self.hand_array.append(tiles)
+                    self.hand_array.extend(tiles)
         self.hand_array.sort()
 
-    def create_tile_combinations(self):
+    def create_tile_combinations(self, floor, ceiling):
         """
         Takes the input hand and creates three lists of tile combinations for each suit.
-        These are melds, couples and eyes, where melds are groups of three, couples are groups of two, and eyes are single
-        tiles.
+        These are melds, couples and eyes, where melds are groups of three, couples are groups of two, and eyes are
+        single tiles.
         """
-        melds = []
-        couples = []
-        eyes = []
-        for suit in self.hand_array:
-            melds.append(list(set([i for i in itertools.combinations(suit, 3)])))
-            couples.append(list(set([i for i in itertools.combinations(suit, 2)])))
-            eyes.append(list(set([i for i in itertools.combinations(suit, 1)])))
+        suit = [i for i in self.hand_array if ceiling >= i >= floor]
+        melds = [set([i for i in itertools.combinations(suit, 3)])]
+        couples = [set([i for i in itertools.combinations(suit, 2)])]
+        eyes = [set([i for i in itertools.combinations(suit, 1)])]
         return melds, couples, eyes
 
-    def get_tile_combinations(self, input_combinations):
+    def get_tile_combinations(self, input_combinations):  # Need to change inequalities to match above (y >= s >= x)
         suit_floor = [self.mapping_array[k][1] for k in range(0, len(self.mapping_array))]
         tile_combinations = [i for j in range(0, len(input_combinations)) for i in input_combinations[j]]
         for combination in tile_combinations:
@@ -124,17 +119,18 @@ class MahjongEfficiency(object):
         elif combination[0] == sum(combination) / len(combination):
             print("ankou", combination)
 
-    def couple_type(self, combination, floor, ceiling):
+    def couple_type(self, combination, floor, ceiling):  # Need to edit this so that: e.g. floor is 1 ceiling is 9
         if combination[0] <= 27:
-            if combination[0] == combination[1]+1:
+            if combination[0] == combination[1] + 1:
                 if combination[0] >= floor or combination[1] > ceiling:
                     print("ryanmen", combination)  # ryanmen (n, n+1) 2-sided wait
                 else:
                     print("penchan", combination)  # penchan (n, n+1) 1-sided wait (edge-wait)
-            elif combination[0] == combination[1]+2:
+            elif combination[0] == combination[1] + 2:
                 print("kanchan", combination)  # kanchan (n, n+2) 1-sided wait
             elif combination[0] == combination[1]:
-                print("pair", combination)  # toitsu, shanpon, or jantou (this depends on the amount of this type present).
+                print("pair",
+                      combination)  # toitsu, shanpon, or jantou (this depends on the amount of this type present).
         else:  # Jihai can only have pairs, no other couple wait type
             if combination[0] == combination[1]:
                 print("pair", combination)
