@@ -20,6 +20,12 @@ class MahjongEfficiency(object):
         :param hand:
         """
         # hand = input("Please input a hand: ")
+        self.shuntsu = []
+        self.ankou = []
+        self.kanchan = []
+        self.pair = []
+        self.penchan = []
+        self.ryanmen = []
         self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
         self.shanten = 6
         self.hand_array = []
@@ -97,29 +103,38 @@ class MahjongEfficiency(object):
         for i in range(0, len(meld)):
             self.meld_type(meld[i])
         for i in range(0, len(couple)):
-            self.couple_type(couple[i])
+            if min(couple[i]) >= self.floor[3]:
+                self.couple_type(couple[i], self.floor[3], self.ceiling[3])
+            elif self.floor[3] >= min(couple[i]) >= self.floor[2]:
+                self.couple_type(couple[i], self.floor[2], self.ceiling[2])
+            elif self.floor[2] >= min(couple[i]) >= self.floor[1]:
+                self.couple_type(couple[i], self.floor[1], self.ceiling[1])
+            else:
+                self.couple_type(couple[i], self.floor[0], self.ceiling[0])
 
     def meld_type(self, combination):
-        if min(combination) < self.floor[3]:
-            shuntsu = []
-            ankou = [i for i in combination if combination[0] == sum(combination) / len(combination)]
+        if min(combination) >= self.floor[3]:
+            if combination[0] == sum(combination) / len(combination):
+                self.ankou.append(combination)
         else:
-            shuntsu = [i for i in combination if combination[1] == sum(combination) / len(combination)
-                       and combination[1] == combination[0] + 1]
-            ankou = [i for i in combination if combination[0] == sum(combination) / len(combination)]
-        return shuntsu, ankou
+            if combination[1] == sum(combination) / len(combination) and combination[1] == combination[0] + 1:
+                self.shuntsu.append(combination)
+            if combination[0] == sum(combination) / len(combination):
+                self.ankou.append(combination)
 
-    def couple_type(self, combination):
-        if min(combination) < self.floor[3]:
-            for floor, ceiling in zip(self.floor, self.ceiling):
-                ryanmen = [i for i in combination if combination[0] == combination[1] + 1
-                           and combination != (floor, ceiling)]
-                penchan = [i for i in combination if combination[0] == combination[1] + 1 if i not in ryanmen]
-                kanchan = [i for i in combination if combination[0] == combination[1] + 2]
-                pair = [i for i in combination if combination[0] == combination[1]]
+    def couple_type(self, combination, floor, ceiling):
+        if floor < self.floor[3]:
+            if (combination[1] == combination[0] + 1) and (combination != (floor, ceiling)):
+                self.ryanmen.append(combination)
+            if (combination[1] == combination[0] + 1) and (combination[0] == floor or combination[1] == ceiling):
+                self.penchan.append(combination)
+            if combination[1] == combination[0] + 2:
+                self.kanchan.append(combination)
+            if combination[0] == combination[1]:
+                self.pair.append(combination)
         else:
-            pair = [i for i in combination if combination[0] == combination[1]]
-        return ryanmen, penchan, kanchan, pair
+            if combination[0] == combination[1]:
+                self.pair.append(combination)
 
     def chiitoitsu(self, couples):
         pairs = [couple for suit in range(0, len(couples)) for couple in couples[suit] if couple[0] == couple[1]]
