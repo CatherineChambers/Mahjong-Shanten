@@ -26,9 +26,12 @@ class MahjongEfficiency(object):
         self.pair = []
         self.penchan = []
         self.ryanmen = []
+        self.hand_array = []
+        self.melds = []
+        self.eyes = []
+        self.couples = []
         self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
         self.shanten = 6
-        self.hand_array = []
         self.mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
         self.floor = [1, 10, 19, 28]
         self.ceiling = [9, 18, 27, 34]
@@ -41,8 +44,9 @@ class MahjongEfficiency(object):
         print("Hand array: {}".format(self.hand_array))  # For testing only.
         combinations = []
         for i in range(0, len(self.floor)):
-            combinations.append(self.create_tile_combinations(self.floor[i], self.ceiling[i]))
-        self.get_tile_combinations(combinations)
+            combinations.append(self.tile_combinations(self.floor[i], self.ceiling[i]))
+            self.kokushi_musou(self.floor[i], self.ceiling[i])
+        self.chiitoitsu()
 
     def error_handling(self):
         """Checks whether the input has 14 tiles, no more than 4 of any tile, and the correct characters."""
@@ -85,32 +89,31 @@ class MahjongEfficiency(object):
                     self.hand_array.extend(tiles)
         self.hand_array.sort()
 
-    def create_tile_combinations(self, floor, ceiling):
+    def tile_combinations(self, floor: int, ceiling: int):
         """
-        Takes the input hand and creates three lists of tile combinations for each suit.
-        These are melds, couples and eyes, where melds are groups of three, couples are groups of two, and eyes are
-        single tiles.
+        Takes the floor and ceiling of a suit and generates tile combinations of melds, couples and eyes, where melds
+        are groups of three, couples are groups of two, and eyes are single tiles.\n
+        It then groups these combinations into types, where n is in range(1, 34):\n
+        Melds: \n
+        shuntsu: (n, n+1, n+2) and ankou: (n, n, n), \n
+        Couples:\n
+        kanchan: (n, n+2), penchan: (1, 2) or (8, 9), ryanmen: (n, n+1) (excluding penchan waits), pair (n, n)
         """
         suit = [i for i in self.hand_array if ceiling >= i >= floor]
-        melds = list(set([i for i in itertools.combinations(suit, 3)]))
-        couples = list(set([i for i in itertools.combinations(suit, 2)]))
-        eyes = list(set([i for i in itertools.combinations(suit, 1)]))
-        return [melds, couples, eyes]
-
-    def get_tile_combinations(self, input_combs):
-        meld = [tup for suit in input_combs for combinations in suit for tup in combinations if len(tup) > 2]
-        couple = [tup for suit in input_combs for combinations in suit for tup in combinations if len(tup) == 2]
-        for i in range(0, len(meld)):
-            self.meld_type(meld[i])
-        for i in range(0, len(couple)):
-            if min(couple[i]) >= self.floor[3]:
-                self.couple_type(couple[i], self.floor[3], self.ceiling[3])
-            elif self.floor[3] >= min(couple[i]) >= self.floor[2]:
-                self.couple_type(couple[i], self.floor[2], self.ceiling[2])
-            elif self.floor[2] >= min(couple[i]) >= self.floor[1]:
-                self.couple_type(couple[i], self.floor[1], self.ceiling[1])
+        self.melds = list(set([i for i in itertools.combinations(suit, 3)]))
+        self.couples = list(set([i for i in itertools.combinations(suit, 2)]))
+        self.eyes = list(set([i for i in itertools.combinations(suit, 1)]))
+        for i in range(0, len(self.melds)):
+            self.meld_type(self.melds[i])
+        for i in range(0, len(self.couples)):
+            if min(self.couples[i]) >= self.floor[3]:
+                self.couple_type(self.couples[i], self.floor[3], self.ceiling[3])
+            elif self.floor[3] >= min(self.couples[i]) >= self.floor[2]:
+                self.couple_type(self.couples[i], self.floor[2], self.ceiling[2])
+            elif self.floor[2] >= min(self.couples[i]) >= self.floor[1]:
+                self.couple_type(self.couples[i], self.floor[1], self.ceiling[1])
             else:
-                self.couple_type(couple[i], self.floor[0], self.ceiling[0])
+                self.couple_type(self.couples[i], self.floor[0], self.ceiling[0])
 
     def meld_type(self, combination):
         if min(combination) >= self.floor[3]:
@@ -136,13 +139,14 @@ class MahjongEfficiency(object):
             if combination[0] == combination[1]:
                 self.pair.append(combination)
 
-    def chiitoitsu(self, couples):
-        pairs = [couple for suit in range(0, len(couples)) for couple in couples[suit] if couple[0] == couple[1]]
-        chiitoitsu_shanten = 6 - len(pairs)  # -1 is a winning hand, 0 is a ready hand
+    def chiitoitsu(self):
+        chiitoitsu_shanten = 6 - len(self.pair)  # -1 is a winning hand, 0 is a ready hand
         return chiitoitsu_shanten
 
-    def kokushi_musou(self, eyes):  # Need 9 different terminals and honours for 4-shanten
-        pass
+    def kokushi_musou(self, floor, ceiling):  # Need 9 different terminals and honours for 4-shanten
+        terminals = [i for i in self.eyes if i == (floor or ceiling)]
+        kokushi_shanten = 13 - len(terminals)
+        return kokushi_shanten
 
     def get_shanten(self):
         pass
