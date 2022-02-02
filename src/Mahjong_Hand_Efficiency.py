@@ -33,7 +33,9 @@ class MahjongEfficiency(object):
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
         print("Hand array: {}".format(self.hand_array))  # For testing only.
-        combinations = [self.create_tile_combinations()]
+        combinations = []
+        for i in range(0, len(self.floor)):
+            combinations.append(self.create_tile_combinations(self.floor[i], self.ceiling[i]))
         self.get_tile_combinations(combinations)
 
     def error_handling(self):
@@ -77,13 +79,13 @@ class MahjongEfficiency(object):
                     self.hand_array.extend(tiles)
         self.hand_array.sort()
 
-    def create_tile_combinations(self):
+    def create_tile_combinations(self, floor, ceiling):
         """
         Takes the input hand and creates three lists of tile combinations for each suit.
         These are melds, couples and eyes, where melds are groups of three, couples are groups of two, and eyes are
         single tiles.
         """
-        suit = [i for j in range(0, len(self.floor)) for i in self.hand_array if self.ceiling[j] >= i >= self.floor[j]]
+        suit = [i for i in self.hand_array if ceiling >= i >= floor]
         melds = list(set([i for i in itertools.combinations(suit, 3)]))
         couples = list(set([i for i in itertools.combinations(suit, 2)]))
         eyes = list(set([i for i in itertools.combinations(suit, 1)]))
@@ -98,7 +100,7 @@ class MahjongEfficiency(object):
             self.couple_type(couple[i])
 
     def meld_type(self, combination):
-        if combination[0] < self.floor[3]:
+        if min(combination) < self.floor[3]:
             shuntsu = []
             ankou = [i for i in combination if combination[0] == sum(combination) / len(combination)]
         else:
@@ -108,15 +110,14 @@ class MahjongEfficiency(object):
         return shuntsu, ankou
 
     def couple_type(self, combination):
-        if combination[0] < self.floor[3]:
-            for floor, ceiling in self.floor, self.ceiling:
+        if min(combination) < self.floor[3]:
+            for floor, ceiling in zip(self.floor, self.ceiling):
                 ryanmen = [i for i in combination if combination[0] == combination[1] + 1
                            and combination != (floor, ceiling)]
                 penchan = [i for i in combination if combination[0] == combination[1] + 1 if i not in ryanmen]
                 kanchan = [i for i in combination if combination[0] == combination[1] + 2]
                 pair = [i for i in combination if combination[0] == combination[1]]
         else:
-            ryanmen = [], penchan = [], kanchan = []
             pair = [i for i in combination if combination[0] == combination[1]]
         return ryanmen, penchan, kanchan, pair
 
