@@ -1,5 +1,4 @@
 import itertools
-from time import time
 
 
 class MahjongEfficiency(object):
@@ -14,9 +13,9 @@ class MahjongEfficiency(object):
         tile_combinations():
             Generates lists containing all the melds, couples and eyes that can be formed from each suit.
         meld_type():
-            Groups the melds into two types, shuntsu and ankou (see method for details).
+            Groups the melds into two types: shuntsu and ankou (see method for details).
         couple_types():
-            Groups the melds into four types, shuntsu and ankou (see method for details).
+            Groups the couples into four types: kanchan, penchan, ryanmen, and pair (see method for details).
     """
 
     def __init__(self, hand):
