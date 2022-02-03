@@ -122,7 +122,7 @@ class MahjongEfficiency(object):
     def meld_type(self, combination: tuple[int, int, int]):
         """ Takes melds and groups them into shuntsu or ankou shapes given the following:
         shuntsu: (n, n+1, n+2) | ankou: (n, n, n)\n where n is in range(1, 34)."""
-        if min(combination) >= self.floor[3]:
+        if min(combination) >= self.floor[3]:  # Jihai can only be ankou (or pair)
             if combination[0] == sum(combination) / len(combination):
                 self.ankou.append(combination)
         else:
@@ -135,16 +135,16 @@ class MahjongEfficiency(object):
         """ Takes couples and groups them into kanchan, penchan or ryanmen waits, or pairs, given the following:
         | kanchan: (n, n+2) | penchan: (1, 2) or (8, 9) | ryanmen: (n, n+1) (excluding penchan waits) | pair: (n, n)
         \n where n is in range(1, 34)."""
-        if floor < self.floor[3]:
+        if floor >= self.floor[3]:  # Jihai can only be pair (or ankou)
+            if combination[0] == combination[1]:
+                self.pair.append(combination)
+        else:
             if (combination[1] == combination[0] + 1) and (combination != (floor, ceiling)):
                 self.ryanmen.append(combination)
             if (combination[1] == combination[0] + 1) and (combination[0] == floor or combination[1] == ceiling):
                 self.penchan.append(combination)
             if combination[1] == combination[0] + 2:
                 self.kanchan.append(combination)
-            if combination[0] == combination[1]:
-                self.pair.append(combination)
-        else:
             if combination[0] == combination[1]:
                 self.pair.append(combination)
 
