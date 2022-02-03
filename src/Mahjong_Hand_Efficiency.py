@@ -64,8 +64,7 @@ class MahjongEfficiency(object):
         for i in range(0, len(self.floor)):
             combinations.append(self.tile_combinations(self.floor[i], self.ceiling[i]))
 
-        shanten = self.get_shanten(self.floor, self.ceiling)
-        self.shanten = min(shanten)
+        self.shanten = self.get_shanten(self.floor, self.ceiling)
         self.output()
 
     def error_handling(self):
@@ -161,7 +160,7 @@ class MahjongEfficiency(object):
 
     def get_shanten(self, floor: list, ceiling: list) -> (int, int, int):
         terminals = {i for i in self.hand_array if i in floor or i in ceiling or i > 27}
-        if self.pair:
+        if [i for pair in self.pair for i in pair if i == floor or ceiling]:
             kokushi_shanten = 13 - len(terminals) - 1
         else:
             kokushi_shanten = 13 - len(terminals)
@@ -177,9 +176,11 @@ class MahjongEfficiency(object):
         return chiitoitsu_shanten, shanten, kokushi_shanten
 
     def output(self):
-        if 6 >= self.shanten > -1:
-            print("Shanten: {}".format(self.shanten))
-        elif self.shanten == -1:
+        shanten = min(self.shanten)
+        if 6 >= shanten > -1:
+            print("Normal shanten: {}, chiitoitsu shanten: {}, kokushi shanten: {}"
+                  .format(self.shanten[1], self.shanten[0], self.shanten[2]))
+        elif shanten == -1:
             print("This hand is complete.")
         else:  # This should be impossible
-            raise Exception("Shanten not within bounds: {}".format(self.shanten))
+            raise Exception("Shanten not within bounds: {}".format(shanten))
