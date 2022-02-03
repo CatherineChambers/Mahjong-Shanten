@@ -27,7 +27,6 @@ class MahjongEfficiency(object):
         self.hand_array = []
 
         self.melds = []
-        self.eyes = []
         self.couples = []
 
         self.shuntsu = []
@@ -102,14 +101,13 @@ class MahjongEfficiency(object):
 
     def tile_combinations(self, floor: int, ceiling: int):
         """
-        Takes the floor and ceiling of a suit and generates tile combinations of melds, couples and eyes, where melds
-        are groups of three, couples are groups of two, and eyes are single tiles. Uses these to then generate waits
+        Takes the floor and ceiling of a suit and generates tile combinations of melds, couples, where melds
+        are groups of three and couples are groups of two. Uses these to then generate waits
         types in self.meld_type() and self.couple_type().
         """
         suit = [i for i in self.hand_array if ceiling >= i >= floor]
         self.melds = list(set([i for i in itertools.combinations(suit, 3)]))
         self.couples = list(set([i for i in itertools.combinations(suit, 2)]))
-        self.eyes = list(set([i for i in itertools.combinations(suit, 1)]))
         for i in range(0, len(self.melds)):
             self.meld_type(self.melds[i])
         for i in range(0, len(self.couples)):
@@ -156,7 +154,7 @@ class MahjongEfficiency(object):
         return chiitoitsu_shanten
 
     def kokushi_musou(self, floor: int, ceiling: int) -> int:
-        terminals = [i for i in self.eyes if i in (floor or ceiling)]
+        terminals = [i for i in self.hand_array if i in (floor or ceiling)]
         kokushi_shanten = 13 - len(terminals)
         return kokushi_shanten
 
@@ -164,8 +162,9 @@ class MahjongEfficiency(object):
         shanten = 6
         # For testing only
         print("Hand Array: {} \nShuntsu: {} \nAnkou: {} \nKanchan: {} closed "
-              "\nPenchan: {} edge wait \nRyanmen: {} open \nPairs: {} "
-              .format(self.hand_array, self.shuntsu, self.ankou, self.kanchan, self.penchan, self.ryanmen, self.pair))
+              "\nPenchan: {} edge wait \nRyanmen: {} open \nPairs: {} \nEyes: {}"
+              .format(self.hand_array, self.shuntsu, self.ankou, self.kanchan, self.penchan, self.ryanmen, self.pair,
+                      self.hand_array))
         return shanten
 
     def output(self):
