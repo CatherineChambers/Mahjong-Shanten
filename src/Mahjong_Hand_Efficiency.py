@@ -1,4 +1,5 @@
 import itertools
+from time import time
 
 
 class MahjongEfficiency(object):
@@ -9,9 +10,13 @@ class MahjongEfficiency(object):
         error_handling():
             Checks that the input contains 14 tiles and a maximum of 4 of each tile.
         map_input_hand():
-            Returns the hand in the mapped format ready for further computation.
-        create_tile_combinations():
-            Returns lists containing all the melds, couples and eyes that can be formed from each suit.
+            Generates the hand in the mapped format ready for further computation.
+        tile_combinations():
+            Generates lists containing all the melds, couples and eyes that can be formed from each suit.
+        meld_type():
+            Groups the melds into two types, shuntsu and ankou (see method for details).
+        couple_types():
+            Groups the melds into four types, shuntsu and ankou (see method for details).
     """
 
     def __init__(self, hand):
@@ -96,12 +101,8 @@ class MahjongEfficiency(object):
     def tile_combinations(self, floor: int, ceiling: int):
         """
         Takes the floor and ceiling of a suit and generates tile combinations of melds, couples and eyes, where melds
-        are groups of three, couples are groups of two, and eyes are single tiles.\n
-        It then groups these combinations into types, where n is in range(1, 34):\n
-        Melds: \n
-        shuntsu: (n, n+1, n+2) and ankou: (n, n, n), \n
-        Couples:\n
-        kanchan: (n, n+2), penchan: (1, 2) or (8, 9), ryanmen: (n, n+1) (excluding penchan waits), pair (n, n)
+        are groups of three, couples are groups of two, and eyes are single tiles. Uses these to then generate waits
+        types in self.meld_type() and self.couple_type().
         """
         suit = [i for i in self.hand_array if ceiling >= i >= floor]
         self.melds = list(set([i for i in itertools.combinations(suit, 3)]))
@@ -119,7 +120,9 @@ class MahjongEfficiency(object):
             else:
                 self.couple_type(self.couples[i], self.floor[0], self.ceiling[0])
 
-    def meld_type(self, combination: tuple):
+    def meld_type(self, combination: tuple[int, int, int]):
+        """ Takes melds and groups them into shuntsu or ankou shapes given the following:
+        shuntsu: (n, n+1, n+2) | ankou: (n, n, n)\n where n is in range(1, 34)."""
         if min(combination) >= self.floor[3]:
             if combination[0] == sum(combination) / len(combination):
                 self.ankou.append(combination)
@@ -129,7 +132,10 @@ class MahjongEfficiency(object):
             if combination[0] == sum(combination) / len(combination):
                 self.ankou.append(combination)
 
-    def couple_type(self, combination: tuple, floor: int, ceiling: int):
+    def couple_type(self, combination: tuple[int, int], floor: int, ceiling: int):
+        """ Takes couples and groups them into kanchan, penchan or ryanmen waits, or pairs, given the following:
+        | kanchan: (n, n+2) | penchan: (1, 2) or (8, 9) | ryanmen: (n, n+1) (excluding penchan waits) | pair: (n, n)
+        \n where n is in range(1, 34)."""
         if floor < self.floor[3]:
             if (combination[1] == combination[0] + 1) and (combination != (floor, ceiling)):
                 self.ryanmen.append(combination)
@@ -157,7 +163,7 @@ class MahjongEfficiency(object):
         return shanten
 
     def output(self):
-        if self.shanten > -1:
+        if 6 > self.shanten > -1:
             print("Shanten: {}".format(self.shanten))
         elif self.shanten == -1:
             print("This hand is complete.")
