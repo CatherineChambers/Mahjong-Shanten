@@ -30,23 +30,27 @@ class MahjongEfficiency(object):
         self.melds = []
         self.eyes = []
         self.couples = []
-        self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
-        self.shanten = 6
         self.mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
         self.floor = [1, 10, 19, 28]
         self.ceiling = [9, 18, 27, 34]
 
         # ----------------------------
+        self.hand = hand.replace(" ", "")  # Need to remove whitespace to avoid errors.
         self.error_handling()  # This call checks that the number of tiles is 14.
         self.map_input_hand()
         self.error_handling()  # This second call checks that the maximum number of each tile is 4.
         print("Hand: {}".format(self.hand))
-        print("Hand array: {}".format(self.hand_array))  # For testing only.
+
         combinations = []
         for i in range(0, len(self.floor)):
             combinations.append(self.tile_combinations(self.floor[i], self.ceiling[i]))
-            self.kokushi_musou(self.floor[i], self.ceiling[i])
-        self.chiitoitsu()
+
+        kokushi_shanten = self.kokushi_musou(self.floor, self.ceiling)
+        chiitoitsu_shanten = self.chiitoitsu()
+        shanten = self.get_shanten()
+        self.shanten = min(chiitoitsu_shanten, shanten, kokushi_shanten)
+
+        self.output()
 
     def error_handling(self):
         """Checks whether the input has 14 tiles, no more than 4 of any tile, and the correct characters."""
@@ -115,7 +119,7 @@ class MahjongEfficiency(object):
             else:
                 self.couple_type(self.couples[i], self.floor[0], self.ceiling[0])
 
-    def meld_type(self, combination):
+    def meld_type(self, combination: tuple):
         if min(combination) >= self.floor[3]:
             if combination[0] == sum(combination) / len(combination):
                 self.ankou.append(combination)
@@ -125,7 +129,7 @@ class MahjongEfficiency(object):
             if combination[0] == sum(combination) / len(combination):
                 self.ankou.append(combination)
 
-    def couple_type(self, combination, floor, ceiling):
+    def couple_type(self, combination: tuple, floor: int, ceiling: int):
         if floor < self.floor[3]:
             if (combination[1] == combination[0] + 1) and (combination != (floor, ceiling)):
                 self.ryanmen.append(combination)
@@ -139,14 +143,23 @@ class MahjongEfficiency(object):
             if combination[0] == combination[1]:
                 self.pair.append(combination)
 
-    def chiitoitsu(self):
-        chiitoitsu_shanten = 6 - len(self.pair)  # -1 is a winning hand, 0 is a ready hand
+    def chiitoitsu(self) -> int:
+        chiitoitsu_shanten = 6 - len(self.pair)
         return chiitoitsu_shanten
 
-    def kokushi_musou(self, floor, ceiling):  # Need 9 different terminals and honours for 4-shanten
-        terminals = [i for i in self.eyes if i == (floor or ceiling)]
+    def kokushi_musou(self, floor: int, ceiling: int) -> int:
+        terminals = [i for i in self.eyes if i in (floor or ceiling)]
         kokushi_shanten = 13 - len(terminals)
         return kokushi_shanten
 
     def get_shanten(self):
-        pass
+        shanten = 6
+        return shanten
+
+    def output(self):
+        if self.shanten > -1:
+            print("Shanten: {}".format(self.shanten))
+        elif self.shanten == -1:
+            print("This hand is complete.")
+        else:  # This should be impossible
+            raise Exception("Shanten not within bounds: {}".format(self.shanten))
