@@ -1,6 +1,18 @@
 import itertools
 
 
+def count_meld_type(meld_type):
+    melds = [i for j in range(0, len(meld_type)) for i in meld_type[j]]
+    tiles = [i for j in range(0, len(melds)) for i in melds[j]]
+    for tile in tiles:
+        dup_index = [x for x, y in enumerate(melds) if tile in y]
+        if len(dup_index) > 1:
+            for k in range(0, len(dup_index)-1):
+                del melds[dup_index[k]]
+                break
+    return melds
+
+
 class MahjongEfficiency(object):
     """
     Class to generate the shanten of a given Japanese Mahjong hand.
@@ -24,6 +36,7 @@ class MahjongEfficiency(object):
         :param hand:
         """
         # hand = input("Please input a hand: ")
+        self.complete_meld = self.incomplete_meld = 0
         self.hand_array = []
 
         self.melds = []
@@ -51,11 +64,8 @@ class MahjongEfficiency(object):
         for i in range(0, len(self.floor)):
             combinations.append(self.tile_combinations(self.floor[i], self.ceiling[i]))
 
-        kokushi_shanten = self.kokushi_musou(self.floor, self.ceiling)
-        chiitoitsu_shanten = self.chiitoitsu()
-        shanten = self.get_shanten()
-        self.shanten = min(chiitoitsu_shanten, shanten, kokushi_shanten)
-
+        shanten = self.get_shanten(self.floor, self.ceiling)
+        self.shanten = min(shanten)
         self.output()
 
     def error_handling(self):
@@ -149,26 +159,22 @@ class MahjongEfficiency(object):
             if combination[0] == combination[1]:
                 self.pair.append(combination)
 
-    def chiitoitsu(self) -> int:
-        chiitoitsu_shanten = 6 - len(self.pair)
-        return chiitoitsu_shanten
-
-    def kokushi_musou(self, floor: int, ceiling: int) -> int:
+    def get_shanten(self, floor: list, ceiling: list) -> (int, int, int):
         terminals = {i for i in self.hand_array if i in floor or i in ceiling or i > 27}
         if self.pair:
             kokushi_shanten = 13 - len(terminals) - 1
         else:
             kokushi_shanten = 13 - len(terminals)
-        return kokushi_shanten
-
-    def get_shanten(self):
-        shanten = 8
-        # For testing only
-        print("Hand Array: {} \nAnkou: {} \nShuntsu: {} \nRyanmen: {} open wait "
-              "\nKanchan: {} closed wait \nPenchan: {} edge wait \nPairs: {} \nEyes: {}"
-              .format(self.hand_array, self.ankou, self.shuntsu, self.ryanmen, self.kanchan, self.penchan, self.pair,
-                      self.hand_array))
-        return shanten  # 8 - 2*complete - incomplete - pairs
+        chiitoitsu_shanten = 6 - len(self.pair)
+        meld_tiles = [self.pair, self.penchan, self.kanchan, self.ryanmen, self.shuntsu, self.ankou]
+        melds = count_meld_type(meld_tiles)
+        for group in melds:
+            if len(group) == 3:
+                self.complete_meld += 1
+            else:
+                self.incomplete_meld += 1
+        shanten = 8 - 2*self.complete_meld - self.incomplete_meld
+        return chiitoitsu_shanten, shanten, kokushi_shanten
 
     def output(self):
         if 6 >= self.shanten > -1:
