@@ -24,16 +24,19 @@ class MahjongEfficiency(object):
         :param hand:
         """
         # hand = input("Please input a hand: ")
-        self.shuntsu = []
-        self.ankou = []
-        self.kanchan = []
-        self.pair = []
-        self.penchan = []
-        self.ryanmen = []
         self.hand_array = []
+
         self.melds = []
         self.eyes = []
         self.couples = []
+
+        self.shuntsu = []
+        self.ankou = []
+        self.kanchan = []
+        self.penchan = []
+        self.ryanmen = []
+        self.pair = []
+
         self.mapping_array = [["m", 0], ["p", 9], ["s", 18], ["z", 27]]
         self.floor = [1, 10, 19, 28]
         self.ceiling = [9, 18, 27, 34]
@@ -139,7 +142,7 @@ class MahjongEfficiency(object):
             if combination[0] == combination[1]:
                 self.pair.append(combination)
         else:
-            if (combination[1] == combination[0] + 1) and (combination != (floor, ceiling)):
+            if (combination[1] == combination[0] + 1) and (combination[0] > floor and combination[1] < ceiling):
                 self.ryanmen.append(combination)
             if (combination[1] == combination[0] + 1) and (combination[0] == floor or combination[1] == ceiling):
                 self.penchan.append(combination)
@@ -159,10 +162,14 @@ class MahjongEfficiency(object):
 
     def get_shanten(self):
         shanten = 6
+        # For testing only
+        print("Hand Array: {} \nShuntsu: {} \nAnkou: {} \nKanchan: {} closed "
+              "\nPenchan: {} edge wait \nRyanmen: {} open \nPairs: {} "
+              .format(self.hand_array, self.shuntsu, self.ankou, self.kanchan, self.penchan, self.ryanmen, self.pair))
         return shanten
 
     def output(self):
-        if 6 > self.shanten > -1:
+        if 6 >= self.shanten > -1:
             print("Shanten: {}".format(self.shanten))
         elif self.shanten == -1:
             print("This hand is complete.")
