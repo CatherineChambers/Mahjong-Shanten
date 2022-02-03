@@ -154,18 +154,21 @@ class MahjongEfficiency(object):
         return chiitoitsu_shanten
 
     def kokushi_musou(self, floor: int, ceiling: int) -> int:
-        terminals = [i for i in self.hand_array if i in (floor or ceiling)]
-        kokushi_shanten = 13 - len(terminals)
+        terminals = {i for i in self.hand_array if i in floor or i in ceiling or i > 27}
+        if self.pair:
+            kokushi_shanten = 13 - len(terminals) - 1
+        else:
+            kokushi_shanten = 13 - len(terminals)
         return kokushi_shanten
 
     def get_shanten(self):
-        shanten = 6
+        shanten = 8
         # For testing only
-        print("Hand Array: {} \nShuntsu: {} \nAnkou: {} \nKanchan: {} closed "
-              "\nPenchan: {} edge wait \nRyanmen: {} open \nPairs: {} \nEyes: {}"
-              .format(self.hand_array, self.shuntsu, self.ankou, self.kanchan, self.penchan, self.ryanmen, self.pair,
+        print("Hand Array: {} \nAnkou: {} \nShuntsu: {} \nRyanmen: {} open wait "
+              "\nKanchan: {} closed wait \nPenchan: {} edge wait \nPairs: {} \nEyes: {}"
+              .format(self.hand_array, self.ankou, self.shuntsu, self.ryanmen, self.kanchan, self.penchan, self.pair,
                       self.hand_array))
-        return shanten
+        return shanten  # 8 - 2*complete - incomplete - pairs
 
     def output(self):
         if 6 >= self.shanten > -1:
