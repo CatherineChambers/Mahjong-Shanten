@@ -1,18 +1,6 @@
 import itertools
 
 
-def count_meld_type(meld_type):
-    melds = [i for j in range(0, len(meld_type)) for i in meld_type[j]]
-    tiles = [i for j in range(0, len(melds)) for i in melds[j]]
-    for tile in tiles:
-        dup_index = [x for x, y in enumerate(melds) if tile in y]
-        if len(dup_index) > 1:
-            for k in range(0, len(dup_index)-1):
-                del melds[dup_index[k]]
-                break
-    return melds
-
-
 class MahjongEfficiency(object):
     """
     Class to generate the shanten of a given Japanese Mahjong hand.
@@ -160,13 +148,13 @@ class MahjongEfficiency(object):
 
     def get_shanten(self, floor: list, ceiling: list) -> (int, int, int):
         terminals = {i for i in self.hand_array if i in floor or i in ceiling or i > 27}
-        if [i for pair in self.pair for i in pair if i == floor or ceiling]:
+        if [i for pair in self.pair for i in pair if i == (floor or ceiling)]:
             kokushi_shanten = 13 - len(terminals) - 1
         else:
             kokushi_shanten = 13 - len(terminals)
         chiitoitsu_shanten = 6 - len(self.pair)
         meld_tiles = [self.pair, self.penchan, self.kanchan, self.ryanmen, self.shuntsu, self.ankou]
-        melds = count_meld_type(meld_tiles)
+        melds = self.count_meld_type(meld_tiles)
         for group in melds:
             if len(group) == 3:
                 self.complete_meld += 1
@@ -174,6 +162,17 @@ class MahjongEfficiency(object):
                 self.incomplete_meld += 1
         shanten = 8 - 2*self.complete_meld - self.incomplete_meld
         return chiitoitsu_shanten, shanten, kokushi_shanten
+
+    def count_meld_type(self, meld_type):
+        melds = [i for j in range(0, len(meld_type)) for i in meld_type[j]]
+        tiles = [i for j in range(0, len(melds)) for i in melds[j]]
+        for tile in tiles:
+            dup_index = [x for x, y in enumerate(melds) if tile in y]
+            if dup_index:
+                for k in range(0, len(dup_index) - 1):
+                    del melds[dup_index[k]]
+                    break
+        return melds
 
     def output(self):
         shanten = min(self.shanten)
