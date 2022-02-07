@@ -146,6 +146,11 @@ class MahjongEfficiency(object):
             if combination[0] == combination[1]:
                 self.pair.append(combination)
 
+    # Still does not correctly work for all hands, e.g. "11122233456789m". Gives 0 when it is a ready hand.
+    # And for "14579m1226p233s66z" it gives 2 when it should be 3
+    # Can't use all combinations of melds because it takes too long, as expected.
+    # Perhaps I need to get the complete melds first, then the incomplete melds from the rest of the hand (excluding
+    # complete melds.
     def get_shanten(self, floor: list, ceiling: list) -> (int, int, int):
         terminals = {i for i in self.hand_array if i in floor or i in ceiling or i > 27}
         if [i for pair in self.pair for i in pair if i == (floor or ceiling)]:
@@ -153,18 +158,23 @@ class MahjongEfficiency(object):
         else:
             kokushi_shanten = 13 - len(terminals)
         chiitoitsu_shanten = 6 - len(self.pair)
-        meld_tiles = [self.pair, self.penchan, self.kanchan, self.ryanmen, self.shuntsu, self.ankou]
+        shuntsu = list(itertools.permutations(self.shuntsu))
+        shuntsu = [shuntsu[k] for k in range(0, len(shuntsu))]
+        shanten = []
+        meld_tiles = self.penchan + self.kanchan + self.ryanmen + self.pair + shuntsu + self.ankou
         melds = self.count_meld_type(meld_tiles)
+        self.complete_meld = 0
+        self.incomplete_meld = 0
         for group in melds:
             if len(group) == 3:
                 self.complete_meld += 1
             else:
                 self.incomplete_meld += 1
-        shanten = 8 - 2*self.complete_meld - self.incomplete_meld
+        shanten.append(8 - 2*self.complete_meld - self.incomplete_meld)
+        shanten = min(shanten)
         return chiitoitsu_shanten, shanten, kokushi_shanten
 
-    def count_meld_type(self, meld_type):
-        melds = [i for j in range(0, len(meld_type)) for i in meld_type[j]]
+    def count_meld_type(self, melds):
         tiles = [i for j in range(0, len(melds)) for i in melds[j]]
         for tile in tiles:
             dup_index = [x for x, y in enumerate(melds) if tile in y]
