@@ -115,8 +115,8 @@ class MahjongEfficiency(object):
             incomplete_meld += couple
             pair += pairs
 
-        terminals = {i for i in self.hand_array if i in floor or i in ceiling or i > 27}
         terminals_full = [i for i in self.hand_array if i in floor or i in ceiling or i > 27]
+        terminals = set(terminals_full)
         if len(terminals) != len(terminals_full):  # If there is a pair
             kokushi_shanten = 13 - len(terminals) - 1
         else:
